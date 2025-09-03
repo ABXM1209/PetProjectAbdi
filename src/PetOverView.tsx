@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAtom } from "jotai";
 import { petsAtom, type PetInterface } from "./PetStore.tsx";
 import axios from "axios";
+import {baseurl} from "./baseurl.ts";
 
 export default function PetOverView() {
     const { id } = useParams<{ id: string }>();
@@ -14,7 +15,7 @@ export default function PetOverView() {
     const toggleSold = async () => {
         try {
             const updated: PetInterface = { ...pet, sold: !pet.sold };
-            await axios.put(`https://api-divine-grass-2111.fly.dev/pets/${id}`, updated);
+            await axios.put(baseurl+"/UpdatePet", updated);
             setPets(pets.map(p => (p.id === id ? updated : p)));
         } catch (err) {
             console.error(err);
@@ -23,7 +24,7 @@ export default function PetOverView() {
 
     const deletePet = async () => {
         try {
-            await axios.delete(`https://api-divine-grass-2111.fly.dev/pets/${id}`);
+            await axios.delete(baseurl+"/DeletePet?id=" + id);
             setPets(pets.filter(p => p.id !== id));
             navigate("/");
         } catch (err) {
@@ -31,23 +32,7 @@ export default function PetOverView() {
         }
     };
 
-    const createPet = async () => {
-        try{
-            const newPet: PetInterface = {
-                id: crypto.randomUUID(),
-                name: "New Pet",
-                breed: "Unknown",
-                imgurl: "https://static.boredpanda.com/blog/wp-content/uploads/2015/07/smiling-cat-2__605.jpg",
-                sold: false
-            };
 
-            const result = await axios.post("https://api-divine-grass-2111.fly.dev/pets", newPet);
-            setPets([...pets, result.data]);
-            navigate(`/pet/${result.data.id}`);
-        } catch (err) {
-            console.error(err);
-        }
-    }
 
     return (
         <div className="p-4">
@@ -60,9 +45,6 @@ export default function PetOverView() {
             </button>
             <button className="btn btn-error m-2" onClick={deletePet}>
                 Delete Pet
-            </button>
-            <button className="btn btn-success m-2" onClick={createPet}>
-                Create Pet
             </button>
         </div>
     );
